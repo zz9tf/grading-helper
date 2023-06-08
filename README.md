@@ -54,8 +54,10 @@ This project is designed to monitor the grading process for Mastery courses as a
     ```
     The script will go over each tracking webpage and perform the following tasks:
       - Search for students who are not in the course.
+      ![image](https://github.com/zz9tf/grading-helper/assets/77183284/16930492-1276-40f4-8e85-e50eda68d48d)
       - Search for grading questions and retrieve their URLs.
       - Analyze the grading progress for each question and open the ungraded answers in a new Chrome window.
+      ![image](https://github.com/zz9tf/grading-helper/assets/77183284/78670940-8a95-4133-8eb7-41a9085a2b4d)
     The script will display information about the grading progress and open the ungraded answers for each question. You can manually grade the answers in the Chrome window.
 
 ## Contributing
