@@ -38,14 +38,14 @@ This project is designed to monitor the grading process for Mastery courses as a
 
    - The format of each line should be: <tracking_webpage_url>, <email_list_file_name>  
     
-  Example:
+     Example:
 
-  ```
-  https://mastery.cs.brandeis.edu/trackingPage1, emailsList2
-  https://mastery.cs.brandeis.edu/trackingPage2, emailsList1
-  ```
+     ```
+     https://mastery.cs.brandeis.edu/trackingPage1, emailsList2
+     https://mastery.cs.brandeis.edu/trackingPage2, emailsList1
+     ```
 
-  PS: if you save all students' emails in a file called 10a.txt, then it should be: '<tracking_webpage_url>, 10a'
+     PS: if you save all students' emails in a file called 10a.txt, then it should be: '<tracking_webpage_url>, 10a'
   
 2. Create email list files for each course. Each email list file should contain one email address per line. ie: [courseName.txt](https://github.com/zz9tf/grading-helper/blob/main/courseName.txt)
 3. Run the main script "grading.py" to do the grading process:
