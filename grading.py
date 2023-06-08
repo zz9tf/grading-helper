@@ -13,13 +13,33 @@ def get_website_content(url):
         }
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
-            # with open('view.html', 'wb') as f:
-            #     f.write(response.content)
+            with open('view.html', 'wb') as f:
+                f.write(response.content)
             return response.content
         else:
             print("Failed to retrieve website content. Status code:", response.status_code)
     except requests.exceptions.RequestException as e:
         print("An error occurred:", e)
+
+def search_student_not_in_course(url, emails):
+    PREFIX = "https://mastery.cs.brandeis.edu/showTheStudentInfo/summary/"
+    url = PREFIX + url.split('/')[-1]
+    content = get_website_content(url)
+    soup = BeautifulSoup(content, 'html.parser')
+    rows = soup.find('tbody').find_all('tr')
+    
+    # Iterate over each row and extract the email information
+    all_emails = []
+    for row in rows:
+        email_cell = row.find_all('td')[1]  # Assuming email is always the second cell
+        email = email_cell.get_text(strip=True)
+        all_emails.append(email)
+    not_in_students = [email for email in emails if email not in all_emails]
+    
+    class_name = soup.find('h1', class_="pb-2 border-bottom").text.strip()[17:]
+    print("{}: {} students haven't joined this class".format(class_name, len(not_in_students)))
+    for student in not_in_students:
+        print("  {}".format(student))
 
 def search_grading_questions(url):
     content = get_website_content(url)
@@ -35,7 +55,6 @@ def search_grading_questions(url):
     
     return q_list
 
-# parse html content
 def search_not_grading_answers(url):
     content = get_website_content(url)
     soup = BeautifulSoup(content, 'html.parser')
@@ -74,11 +93,23 @@ def go_over_one_question(base_url, df):
     # Go over all students answers for one question
     for col in df.columns:
         if "P" != col[0]: continue
-        print("Question: " + col)
         need_grading = df[col].str.startswith("No TA reviews yet")
         not_finished = df[col] == "+"
-        print(">> {} students need to be graded".format(sum(need_grading)))
-        print(">> {} students hasn't finished this question yet.".format(sum(not_finished)))
+        finished_grading = len(df[col]) - sum(need_grading) - sum(not_finished)
+        # All finished
+        if sum(need_grading) == 0 and sum(not_finished) != 0:
+            print("\nQuestion: " + col)
+            print(">> {} students have been graded.".format(finished_grading))
+            print(">> {} students need to be graded.".format(sum(need_grading)))
+            print(">> {} students haven't finished this question yet.".format(sum(not_finished)))
+            continue
+        elif sum(need_grading) == 0 and sum(not_finished) == 0:
+            continue
+        else:
+            print("Question: " + col)
+            print(">> {} students have been graded.".format(finished_grading))
+            print(">> {} students need to be graded.".format(sum(need_grading)))
+            print(">> {} students haven't finished this question yet.".format(sum(not_finished)))
         if sum(need_grading) == 0: continue
         # Create a new instance of the Chrome driver
         driver = webdriver.Chrome()
@@ -103,6 +134,9 @@ def main():
         # Open the corresponding email list file
         with open(email_file, 'r') as email_f:
             emails = [row.strip() for row in email_f.readlines()]
+        
+        # Search which student is not in this course
+        search_student_not_in_course(url, emails)
         
         # Search one tracking webpage
         question_urls = search_grading_questions(url)
