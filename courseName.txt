@@ -1,0 +1,4 @@
+student1email@brandeis.edu
+student2email@brandeis.edu
+student3email@brandeis.edu
+student4email@brandeis.edu
