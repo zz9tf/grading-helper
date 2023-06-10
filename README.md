@@ -31,7 +31,7 @@ This project is designed to monitor the grading process for Mastery courses as a
     COOKIE=<cookie_value>
     ```
     
-    PS: You can find this with google inspect. It should be at network and find some response sources with request url like 'https://mastery.cs.brandeis.edu/something/else'. Copy and paste your cookie from the request headers to your local .env file.
+    PS: You can find this with google inspect. It should be at network and find some response sources with request url like 'https://mastery.cs.brandeis.edu/something/else'. Copy and paste your cookie from the request headers to your local .env file. Sometimes, cookie may get expired, you need to refresh it when you start to use it each time.
     
 ## Usage
 1. Modify a file called trackingList.txt in the project directory. Each line in the file represents a tracking webpage and its corresponding email list file.
