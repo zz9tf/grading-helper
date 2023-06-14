@@ -102,6 +102,8 @@ def go_over_one_question(base_url, df):
             print(">> {} students have been graded.".format(finished_grading))
             print(">> {} students need to be graded.".format(sum(need_grading)))
             print(">> {} students haven't finished this question yet.".format(sum(not_finished)))
+            for student in df['Student'][not_finished]:
+                print("    {}".format(student))
             continue
         elif sum(need_grading) == 0 and sum(not_finished) == 0:
             continue
@@ -141,11 +143,12 @@ def main():
         # Search one tracking webpage
         question_urls = search_grading_questions(url)
         for q_url in question_urls:
-            print('You are grading problem set: {}'.format(q_url['title']))
+            print('\nYou are grading problem set: {}'.format(q_url['title']))
             df_for_one_question = search_not_grading_answers(q_url['url'])
             df_for_one_question = df_for_one_question[df_for_one_question['Student'].isin(emails)]
             go_over_one_question(q_url['url'], df_for_one_question)
         print()
+        print('----------------------------------------------------------------')
 
     f.close()
 
