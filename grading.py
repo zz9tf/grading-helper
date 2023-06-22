@@ -318,7 +318,7 @@ class grading_helper:
    
     def interface(self):
         while True:
-            header = "Master TA helper:\n" +\
+            header = "Mastery TA helper:\n" +\
                     "1. Course info summary\n" +\
                     "2. Student not in class\n" +\
                     "3. Student didn't finished their homework\n" +\
