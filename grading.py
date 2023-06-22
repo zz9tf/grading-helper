@@ -11,9 +11,10 @@ class grading_helper:
     def __init__(self) -> None:
         self.df_course_course_block = None
         self.df_course_students = pd.DataFrame(columns=['course', 'student'])
-        self.df_student_not_in = pd.DataFrame(columns=['course', 'course block', 'course url', 'student status'])
+        self.df_student_not_in = pd.DataFrame(columns=['student', 'course', 'course block'])
         self.df_course_details = pd.DataFrame(columns=['course block', 'problem set', 'problem', 'status (NotFinish/NeedGrad/Finished)'])
-        self.course_df = {'course':{'probSet': 'DataFrame'}}
+        self.not_finished_student = pd.DataFrame(columns=['student', 'course', 'course block', 'problem Set', 'problem'])
+        self.course_df = {'course':{('probSet Name', 'probSet url'): 'DataFrame'}}
 
     def load_basic_info(self):
         # Load related links for the courses
@@ -36,19 +37,23 @@ class grading_helper:
                 ], ignore_index=True)
 
     def get_student_not_in_course(self):
+        df_student_not_in = {
+            'course': [],
+            'course block': [],
+            'student': []
+        }
         self.df_student_not_in['course'] = self.df_course_course_block['course']
-        self.df_student_not_in['course url'] = self.df_course_course_block['url']
-        self.df_student_not_in['student status'] = False
-        self.df_student_not_in = pd.merge(self.df_course_students, self.df_student_not_in, how='left', on='course')
         for i, row in self.df_course_course_block.iterrows():
             # Search which student is not in this course
             url = row['url']
+            course = row['course']
             students = self.df_course_students['student'][self.df_course_students['course'] == row['course']]
             course_block_name, not_in_students = self.search_student_not_in_course(url, students)
-            select_rows = self.df_student_not_in['course url'] == url
-            self.df_student_not_in.loc[select_rows, 'course block'] = course_block_name
-            select_rows = self.df_student_not_in['student'].isin(not_in_students) & self.df_student_not_in['course url'] == url
-            self.df_student_not_in.loc[select_rows, 'student status'] = True
+            df_student_not_in['student'] += not_in_students
+            df_student_not_in['course block'] += len(not_in_students)*[course_block_name]
+            df_student_not_in['course'] += len(not_in_students)*[course]
+        
+        self.df_student_not_in = pd.DataFrame(df_student_not_in)
 
     def search_student_not_in_course(self, url, emails):
         PREFIX = "https://mastery.cs.brandeis.edu/showTheStudentInfo/summary/"
@@ -94,6 +99,14 @@ class grading_helper:
             'status (NotFinish/NeedGrad/Finished)': []
         }
         
+        not_finished_student = {
+            'student': [], 
+            'course': [], 
+            'course block':[], 
+            'problem set': [],
+            'problem': []
+        }
+        
         self.course_df = {}
         for i, row in self.df_course_course_block.iterrows():
             course = row['course']
@@ -116,8 +129,16 @@ class grading_helper:
                     course_details['problem set'].append(problem_set_title)
                     course_details['problem'].append(col)
                     course_details['status (NotFinish/NeedGrad/Finished)'].append(f'{not_finished}:{need_grading}:{finished_grading}')
+
+                    not_finished_student['student'] += df_one_problem_set['Student'][df_one_problem_set[col] == "+"].to_list()
+                    not_finished_student['course'] += len(df_one_problem_set['Student'][df_one_problem_set[col] == "+"])*[course]
+                    not_finished_student['course block'] += len(df_one_problem_set['Student'][df_one_problem_set[col] == "+"])*[block_title]
+                    not_finished_student['problem set'] += len(df_one_problem_set['Student'][df_one_problem_set[col] == "+"])*[problem_set_title]
+                    not_finished_student['problem'] += len(df_one_problem_set['Student'][df_one_problem_set[col] == "+"])*[col]
+                    
                 
         self.df_course_details = pd.DataFrame(course_details)
+        self.not_finished_student = pd.DataFrame(not_finished_student)
 
     def search_grading_questions(self, url):
         content = self.get_website_content(url)
@@ -210,8 +231,7 @@ class grading_helper:
             input()
             driver.quit()
 
-    def interface(self):
-        print('Course situation:')
+    def print_course_summary(self):
         format_style = '{:^30} | {:^30} | {:^10} | {:^10}'
         print(format_style.format('course block', 'problem set', 'problem', 'status (NotFinish:NeedGrad:Finished)'))
         print('-'*106)
@@ -223,7 +243,7 @@ class grading_helper:
                 course = ''
             else:
                 if prev_group_name != None:
-                    print(format_style.format(*['---']*4))
+                    print('-'*106)
                 prev_group_name = group_name[0]
                 course = group_name[0]
             
@@ -239,15 +259,109 @@ class grading_helper:
                     '', 
                     group_data.loc[row_id, 'problem'], 
                     group_data.loc[row_id, 'status (NotFinish/NeedGrad/Finished)']))
+
+    def print_not_in_student(self):
+        format_style = '{:^8} | {:^30} | {:^30} '
+        print(format_style.format('course', 'block', 'student'))
         
-        print('Start grading:')
+        details = self.df_student_not_in.groupby(['course', 'course block'])
+        prev_group_name = [None]*2
+        for group_name, group_data in details:
+            course = '' if group_name[0] == prev_group_name[0] else group_name[0]
+            block = '' if group_name[1] == prev_group_name[1] else group_name[1]
+            
+            prev_group_name = group_name
+            
+            group_data = group_data.reset_index(drop=True)
+            print(format_style.format(
+                course[:30], 
+                block[:30], 
+                group_data.loc[0, 'student']))
+            
+            for row_id in range(1, len(group_data)):
+                print(format_style.format(
+                    '', 
+                    '', 
+                    group_data.loc[row_id, 'student']))
+            print('-'*106)
+             
+    def print_not_finished_student(self):
+        format_style = '{:^8} | {:^30} | {:^20} | {:^20} | {:^20}'
+        print(format_style.format('course', 'course block', 'problem set', 'problem', 'student'))
         
-        for course_block, probSets in self.course_df.items():
-            print(course_block)
-            for probSet, df in probSets.items():
-                print(probSet[0])
-                input()
-                self.go_over_one_question(probSet[1], df)
+        details = self.not_finished_student.groupby(['course', 'course block', 'problem set', 'problem'])
+        prev_group_name = [None]*4
+        for group_name, group_data in details:
+            course = '' if group_name[0] == prev_group_name[0] else group_name[0]
+            block = '' if group_name[1] == prev_group_name[1] else group_name[1]
+            probSet = '' if group_name[2] == prev_group_name[2] else group_name[2]
+            problem = '' if group_name[3] == prev_group_name[3] else group_name[3]
+            
+            prev_group_name = group_name
+            
+            group_data = group_data.reset_index(drop=True)
+            print(format_style.format(
+                course, 
+                block[:30],
+                probSet[:20], 
+                problem[:20],
+                group_data.loc[0, 'student']))
+            
+            for row_id in range(1, len(group_data)):
+                print(format_style.format(
+                    '', 
+                    '', 
+                    '',  
+                    '', 
+                    group_data.loc[row_id, 'student']))
+            print('-'*106)
+   
+    def interface(self):
+        while True:
+            header = "Master TA helper:\n" +\
+                    "1. Course info summary\n" +\
+                    "2. Student not in class\n" +\
+                    "3. Student didn't finished their homework\n" +\
+                    "4. Grading\n" +\
+                    "5. quit"
+            
+            print(header)
+            
+            select = int(input("What are you going to do(please input a number from 1 to 5):"))
+            if select == 1:
+                self.print_course_summary()
+            
+            elif select == 2:
+                print()
+                print(self.df_student_not_in.groupby(['student']).size()
+                      .reset_index(name='count').sort_values(by='count', ascending=False, ignore_index=True))
+                print()
+                self.print_not_in_student()
+                
+            elif select == 3:
+                print(self.not_finished_student.groupby(['student']).size()
+                      .reset_index(name='count').sort_values(by='count', ascending=False, ignore_index=True))
+                print()
+                self.print_not_finished_student()
+            
+            elif select == 4:
+                print('Start grading:')
+                for course_block, probSets in self.course_df.items():
+                    for probSet, df in probSets.items():
+                        self.go_over_one_question(probSet[1], df)
+            
+            elif select == 5:
+                print('bye ~')
+                exit()
+            else:
+                print("please input a number from 1 to 5")
+            print()
+            print('*'*106)
+            print()
+        
+        
+        
+        
 
 def main():
     print('Loading...')
@@ -255,7 +369,6 @@ def main():
     g.load_basic_info()
     g.get_student_not_in_course()
     g.get_problem_details()
-    
     g.interface()
     print("done")
 
