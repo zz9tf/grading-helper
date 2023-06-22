@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from bs4 import BeautifulSoup
 import pandas as pd
 from seleniumwire import webdriver
-from tqdm import tqdm
+import sys
 
 load_dotenv()
 
@@ -326,35 +326,42 @@ class grading_helper:
                     "5. quit"
             
             print(header)
-            
-            select = int(input("What are you going to do(please input a number from 1 to 5):"))
-            if select == 1:
-                self.print_course_summary()
-            
-            elif select == 2:
-                print()
-                print(self.df_student_not_in.groupby(['student']).size()
-                      .reset_index(name='count').sort_values(by='count', ascending=False, ignore_index=True))
-                print()
-                self.print_not_in_student()
+            try:
+                select = int(input("What are you going to do(please input a number from 1 to 5):\n"))
+                if select == 1:
+                    self.print_course_summary()
                 
-            elif select == 3:
-                print(self.not_finished_student.groupby(['student']).size()
-                      .reset_index(name='count').sort_values(by='count', ascending=False, ignore_index=True))
-                print()
-                self.print_not_finished_student()
-            
-            elif select == 4:
-                print('Start grading:')
-                for course_block, probSets in self.course_df.items():
-                    for probSet, df in probSets.items():
-                        self.go_over_one_question(probSet[1], df)
-            
-            elif select == 5:
-                print('bye ~')
-                exit()
-            else:
+                elif select == 2:
+                    print()
+                    print(self.df_student_not_in.groupby(['student']).size()
+                        .reset_index(name='count').sort_values(by='count', ascending=False, ignore_index=True))
+                    print()
+                    self.print_not_in_student()
+                    
+                elif select == 3:
+                    print(self.not_finished_student.groupby(['student']).size()
+                        .reset_index(name='count').sort_values(by='count', ascending=False, ignore_index=True))
+                    print()
+                    self.print_not_finished_student()
+                
+                elif select == 4:
+                    print('Start grading:')
+                    for course_block, probSets in self.course_df.items():
+                        for probSet, df in probSets.items():
+                            self.go_over_one_question(probSet[1], df)
+                    sys.stdin.flush()
+                    sys.stdin.readline()
+                
+                elif select == 5:
+                    print('bye ~')
+                else:
+                    print("please input a number from 1 to 5")
+            except:
                 print("please input a number from 1 to 5")
+            
+            if select == 5:
+                exit()
+            
             print()
             print('*'*106)
             print()
@@ -370,6 +377,5 @@ def main():
     g.get_student_not_in_course()
     g.get_problem_details()
     g.interface()
-    print("done")
 
 main()
