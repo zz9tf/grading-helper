@@ -22,11 +22,10 @@ This project is designed to monitor the grading process for Mastery courses as a
    ```
    git clone https://github.com/your_username/grading-process-monitoring.git
    ```
-2. Install the required Python packages with Python > 3.6.
-
-  ```
-  pip install -r requirements.txt
-  ```
+2. Install the required Python packages with Python > 3.6:
+    ```
+    pip install -r requirements.txt
+    ```
 
 3. Download and install ChromeDriver from the official website: [ChromeDriver Downloads](https://sites.google.com/chromium.org/driver/?pli=1)
 
