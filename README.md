@@ -61,8 +61,14 @@ This project is designed to monitor the grading process for Mastery courses as a
     python grading.py
     ```
     The script will go over each tracking webpage and perform the following tasks:
+
+      <img width="89" alt="image" src="https://github.com/zz9tf/grading-helper/assets/77183284/5154aca9-d1b6-4c89-8185-33f37861a5ed">
+      
+      After waiting for a while, you will have menu:
+
+      <img width="430" alt="image" src="https://github.com/zz9tf/grading-helper/assets/77183284/a9f7332e-66aa-494e-b16f-b151d752bb34">
+      
       - Search for students who are not in the course.
-      ![image](https://github.com/zz9tf/grading-helper/assets/77183284/16930492-1276-40f4-8e85-e50eda68d48d)
       - Search for grading questions and retrieve their URLs.
       - Analyze the grading progress for each question and open the ungraded answers in a new Chrome window.
       ![image](https://github.com/zz9tf/grading-helper/assets/77183284/78670940-8a95-4133-8eb7-41a9085a2b4d)
