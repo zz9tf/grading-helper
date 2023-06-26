@@ -9,6 +9,9 @@ load_dotenv()
 
 class grading_helper:
     def __init__(self) -> None:
+        self.init_df()
+
+    def init_df(self) -> None:
         self.df_course_course_block = None
         self.df_course_students = pd.DataFrame(columns=['course', 'student'])
         self.df_student_not_in = pd.DataFrame(columns=['student', 'course', 'course block'])
@@ -318,17 +321,22 @@ class grading_helper:
             print('-'*106)
    
     def interface(self):
+        print('Loading...')
+        self.load_basic_info()
+        self.get_student_not_in_course()
+        self.get_problem_details()
         while True:
             header = "Mastery TA helper:\n" +\
                     "1. Course info summary\n" +\
                     "2. Student not in class\n" +\
                     "3. Student didn't finished their homework\n" +\
                     "4. Grading\n" +\
-                    "5. quit"
+                    "5. Refreshing the data (Once you graded someone, or someone just sumbit their answers)\n" +\
+                    "6. quit"
             
             print(header)
             try:
-                select = int(input("What are you going to do(please input a number from 1 to 5):\n"))
+                select = int(input("What are you going to do(please input a number from 1 to 6):\n"))
                 if select == 1:
                     self.print_course_summary()
                 
@@ -350,15 +358,29 @@ class grading_helper:
                     for course_block, probSets in self.course_df.items():
                         for probSet, df in probSets.items():
                             self.go_over_one_question(probSet[1], df)
+                            
+                    print('Refreshing the data since you just graded...')
+                    self.init_df()
+                    self.load_basic_info()
+                    self.get_student_not_in_course()
+                    self.get_problem_details()
                 
                 elif select == 5:
+                    print('Refreshing the data...')
+                    self.init_df()
+                    self.load_basic_info()
+                    self.get_student_not_in_course()
+                    self.get_problem_details()
+                
+                elif select == 6:
                     print('bye ~')
                 else:
-                    print("please input a number from 1 to 5")
+                    print("please input a number from 1 to 6")
             except:
-                print("please input a number from 1 to 5")
+                print("please input a number from 1 to 6")
             
-            if select == 5:
+            
+            if select == 6:
                 exit()
             
             print()
@@ -370,11 +392,7 @@ class grading_helper:
         
 
 def main():
-    print('Loading...')
     g = grading_helper()
-    g.load_basic_info()
-    g.get_student_not_in_course()
-    g.get_problem_details()
     g.interface()
 
 main()
