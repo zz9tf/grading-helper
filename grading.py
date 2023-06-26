@@ -24,6 +24,7 @@ class grading_helper:
                 line = line.split(',')
                 course = line[1].strip()
                 url = line[0].strip()
+                if url[0] == '#': continue
                 tracking_list.append({'course': course, 'url': url})
         self.df_course_course_block = pd.DataFrame(tracking_list)
         
@@ -349,8 +350,6 @@ class grading_helper:
                     for course_block, probSets in self.course_df.items():
                         for probSet, df in probSets.items():
                             self.go_over_one_question(probSet[1], df)
-                    sys.stdin.flush()
-                    sys.stdin.readline()
                 
                 elif select == 5:
                     print('bye ~')

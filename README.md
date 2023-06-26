@@ -22,8 +22,14 @@ This project is designed to monitor the grading process for Mastery courses as a
    ```
    git clone https://github.com/your_username/grading-process-monitoring.git
    ```
-2. Install the required Python packages
+2. Install the required Python packages with Python > 3.6.
+
+  ```
+  pip install -r requirements.txt
+  ```
+
 3. Download and install ChromeDriver from the official website: [ChromeDriver Downloads](https://sites.google.com/chromium.org/driver/?pli=1)
+
 4. Set up environment variables:
     - Create a .env file in the project directory.
     - Add the following line to the .env file, replacing <cookie_value> with the actual cookie value after you login Mastery:
@@ -46,6 +52,8 @@ This project is designed to monitor the grading process for Mastery courses as a
      ```
 
      PS: if you save all students' emails in a file called 10a.txt, then it should be: '<tracking_webpage_url>, 10a'
+     
+     PS2: if you want to ask python script not to track some urls, you can add '#' at the front of them to comment them, ie. `# https://mastery.cs.brandeis.edu/trackingPage1, emailsList2`
   
 2. Create email list files for each course. Each email list file should contain one email address per line. ie: [courseName.txt](https://github.com/zz9tf/grading-helper/blob/main/courseName.txt)
 3. Run the main script "grading.py" to do the grading process:
