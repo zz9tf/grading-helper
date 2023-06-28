@@ -116,7 +116,7 @@ class grading_helper:
             course = row['course']
             url = row['url']
             students = self.df_course_students.loc[self.df_course_students['course'] == course, 'student']
-            self.course_df[course] = {}
+            self.course_df[course] = {} if course not in self.course_df.keys() else self.course_df[course]
             
             # Search one tracking webpage
             block_title, problem_set_urls = self.search_grading_questions(url)
@@ -356,7 +356,9 @@ class grading_helper:
                 elif select == 4:
                     print('Start grading:')
                     for course_block, probSets in self.course_df.items():
+                        print(course_block)
                         for probSet, df in probSets.items():
+                            print(probSet)
                             self.go_over_one_question(probSet[1], df)
                             
                     print('Refreshing the data since you just graded...')
